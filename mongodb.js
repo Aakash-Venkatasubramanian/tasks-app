@@ -1,3 +1,5 @@
+/*jshint esversion: 8 */
+
 const mongodb = require('mongodb')
 const MongoClient = mongodb.MongoClient
 const ObjectID = mongodb.ObjectID
