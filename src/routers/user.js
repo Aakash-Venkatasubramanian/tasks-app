@@ -53,20 +53,7 @@ router.get('/user/profile', auth, async (req, res) => {
     res.send({result:req.user, status:'success'})
 })
 
-router.get('/user/:_id', async (req, res) => {
-    const _id = req.params._id
-    try {
-        const user = await User.findById(_id)
-        if(!user) {
-            return res.status(404).send({result:{'error':'No user found'}, status:'success'})
-        }
-        res.send({result:user, status:'success'})
-    } catch (error) {
-        res.status(500).send({result:error, status:'failed'})
-    }
-})
-
-router.patch('/user/:_id', async (req, res) => {
+router.patch('/user/profile', auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'age', 'email', 'password']
     const isValidUpdate = updates.every((update) => allowedUpdates.includes(update))
@@ -76,15 +63,9 @@ router.patch('/user/:_id', async (req, res) => {
     }
 
     try {
-        const user = await User.findById(req.params._id)
-        
-        if(!user) {
-            return res.status(404).send({result:{'error':'No user found'}, status:'success'})
-        }
-
-        updates.forEach((update) => user[update] = req.body[update])
-        await user.save()
-        res.send({result:user, status:'success'})
+        updates.forEach((update) => req.user[update] = req.body[update])
+        await req.user.save()
+        res.send({result:req.user, status:'success'})
     } catch (error) {
         res.status(400).send({result:error, status:'failed'})
     }
@@ -103,13 +84,10 @@ router.get('/users/:name', async (req, res) => {
     }
 })
 
-router.delete('/user/:_id', async (req, res) => {
-    const user = await User.findByIdAndDelete(req.params._id)
+router.delete('/user/profile', auth, async (req, res) => {
     try {
-        if(!user) {
-            return res.status(404).send({result:{'error':'No user found'}, status:'success'})
-        }
-        res.send({result:user, status:'success'})
+        await req.user.remove()
+        res.send({result:req.user, status:'success'})
     } catch (error) {
         res.status(500).send({result:error, status:'failed'})
     }
