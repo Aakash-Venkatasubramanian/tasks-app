@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*jshint esversion: 8 */
 
 const mongoose = require('mongoose')
@@ -7,10 +8,18 @@ const jwt = require('jsonwebtoken')
 
 const userSchema = mongoose.Schema({
     name: {
+=======
+const mongoose = require('mongoose')
+const validator = require('validator')
+
+const User = mongoose.model('User', {
+    name:{
+>>>>>>> rewamp
         type:String,
         required:true,
         trim:true
     },
+<<<<<<< HEAD
     age: {
         type:Number,
         default:0
@@ -20,19 +29,31 @@ const userSchema = mongoose.Schema({
         required:true,
         unique:true,
         trim:true,
+=======
+    email:{
+        type:String,
+        required:true,
+        trim:true,
+        lowercase:true,
+>>>>>>> rewamp
         validate(value) {
             if(!validator.isEmail(value)) {
                 throw new Error('Invalid email')
             }
         }
     },
+<<<<<<< HEAD
     password: {
+=======
+    password:{
+>>>>>>> rewamp
         type:String,
         required:true,
         trim:true,
         minlength:7,
         validate(value) {
             if(value.toLowerCase().includes('password')) {
+<<<<<<< HEAD
                 throw new Error('Password cannot contain password')
             }
         }
@@ -95,3 +116,21 @@ userSchema.pre('save', async function(next) {
 const Users = mongoose.model('User', userSchema)
 
 module.exports = Users
+=======
+                throw new Error('Invalid password')
+            }
+        }
+    },
+    age:{
+        type:Number,
+        default:0,
+        validate(value) {
+            if(value < 0) {
+                throw new Error('Age must be positive')
+            }
+        }
+    }
+})
+
+module.exports = User
+>>>>>>> rewamp

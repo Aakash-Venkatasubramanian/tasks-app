@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 /*jshint esversion: 8 */
 
+=======
+>>>>>>> rewamp
 const express = require('express')
 require('./db/mongoose')
 const userRouter = require('./routers/user')
@@ -13,5 +16,9 @@ app.use(userRouter)
 app.use(taskRouter)
 
 app.listen(port, () => {
+<<<<<<< HEAD
     console.log('Server running on ' + port)
+=======
+    console.log('Server is running in port ' + port)
+>>>>>>> rewamp
 })
