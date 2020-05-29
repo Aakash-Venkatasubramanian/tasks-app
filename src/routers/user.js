@@ -1,4 +1,5 @@
 const express = require('express')
+const auth = require('../middleware/auth')
 const User = require('../models/user')
 const userRouter = new express.Router()
 
@@ -8,20 +9,27 @@ userRouter.post('/users', async (req, res) => {
 
     try {
         await user.save()
-        res.status(201).send(user)
+        const token = await user.generateAuthToken()
+        res.status(201).send({user, token})
     } catch (e) {
         res.status(400).send(e)
     }
 })
 
-// Get all users
-userRouter.get('/users', async (req, res) => {
+// Login user
+userRouter.post('/users/login', async (req, res) => {
     try {
-        const users = await User.find({})
-        res.send(users)
+        const user = await User.findByCredentials(req.body.email, req.body.password)
+        const token = await user.generateAuthToken()
+        res.send({user, token})
     } catch (e) {
-        res.status(500).send(e)
+        res.status(400).send()
     }
+})
+
+// Get all users
+userRouter.get('/users/me', auth, async (req, res) => {
+    res.send(req.user)
 })
 
 // Get one user with id
