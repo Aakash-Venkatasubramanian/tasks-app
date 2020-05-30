@@ -27,29 +27,39 @@ userRouter.post('/users/login', async (req, res) => {
     }
 })
 
-// Get all users
+// Logout user
+userRouter.post('/users/logout', auth, async (req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter((token) => {
+            return token.token !== req.token
+        })
+        await req.user.save()
+
+        res.send()
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+// Logout from all devices
+userRouter.post('/users/logoutAll', auth, async (req, res) => {
+    try {
+        req.user.tokens = []
+        await req.user.save()
+
+        res.send()
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+// Get user profile
 userRouter.get('/users/me', auth, async (req, res) => {
     res.send(req.user)
 })
 
-// Get one user with id
-userRouter.get('/users/:userid', async (req, res) => {
-    const id = req.params.userid
-
-    try {
-        const user = await User.findById(id)
-        if(!user) {
-            return res.status(404).send()
-        }
-
-        res.send(user)
-    } catch (e) {
-        res.status(500).send(e)
-    }
-})
-
 // Update user by id
-userRouter.patch('/users/:userid', async (req, res) => {
+userRouter.patch('/users/me', auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'age', 'email', 'password']
     const isValidUpdate = updates.every((update) => allowedUpdates.includes(update))
@@ -59,31 +69,21 @@ userRouter.patch('/users/:userid', async (req, res) => {
     }
 
     try {
-        const user = await User.findById(req.params.userid)
+        updates.forEach((update) => req.user[update] = req.body[update])
 
-        updates.forEach((update) => user[update] = req.body[update])
+        await req.user.save()
 
-        await user.save()
-
-        if(!user) {
-            return res.status(404).send()
-        }
-
-        res.send(user)
+        res.send(req.user)
     } catch (e) {
         res.status(400).send(e)
     }
 })
 
 // Delete user
-userRouter.delete('/users/:userid', async (req, res) => {
+userRouter.delete('/users/me', auth, async (req, res) => {
     try {
-        const user = await User.findByIdAndDelete(req.params.userid)
-        if(!user) {
-            return res.status(404).send()
-        }
-
-        res.send(user)
+        await req.user.remove()
+        res.send(req.user)
     } catch (e) {
         res.status(500).send(e)
     }
