@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 
-const taskSchema = mongoose.Schema({
+// Works without new operator too
+const taskSchema = new mongoose.Schema({
     description:{
         type:String,
         required:true,
@@ -15,6 +16,8 @@ const taskSchema = mongoose.Schema({
         required:true,
         ref:'User'
     }
+}, {
+    timestamps:true
 })
 
 taskSchema.methods.toJSON = function () {
