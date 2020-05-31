@@ -1,4 +1,6 @@
 const express = require('express')
+const multer = require('multer')
+const sharp = require('sharp')
 const auth = require('../middleware/auth')
 const User = require('../models/user')
 const userRouter = new express.Router()
@@ -86,6 +88,56 @@ userRouter.delete('/users/me', auth, async (req, res) => {
         res.send(req.user)
     } catch (e) {
         res.status(500).send(e)
+    }
+})
+
+const upload = multer({
+    limits:{
+        fileSize:1000000
+    },
+    fileFilter(req, file, cb) {
+        if(!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+            return cb(new Error('Please upload an image'))
+        }
+
+        cb(undefined, true)
+    }
+})
+
+// Upload a display picture
+userRouter.post('/users/me/dp', auth, upload.single('avatar'), async (req, res) => {
+    const buffer = await sharp(req.file.buffer).resize({width:250, height:250}).png().toBuffer()
+    req.user.dp = buffer
+    await req.user.save()
+    res.send()
+}, (error, req, res, next) => {
+    res.status(400).send({error:error.message})
+})
+
+// Delete user dp
+userRouter.delete('/users/me/dp', auth, async (req, res) => {
+    try {
+        req.user.dp = undefined
+        await req.user.save()
+        res.send()
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+// Display profile picture
+userRouter.get('/users/:userid/dp', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userid)
+
+        if(!user || !user.dp) {
+            throw new Error()
+        }
+
+        res.set('Content-Type', 'image/png')
+        res.send(user.dp)
+    } catch (e) {
+        res.status(404).send()
     }
 })
 
