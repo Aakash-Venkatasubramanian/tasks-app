@@ -1,3 +1,3 @@
 # managio
 
-A simple task manager backend
+A simple task manager backend which uses nodejs
